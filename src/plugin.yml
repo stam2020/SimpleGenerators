@@ -1,0 +1,16 @@
+name: SimpleGenerators
+version: 1.0
+api-version: 1.17
+main: plainplaying.plugin.gens.SimpleGenerators
+commands:
+  sell:
+    description: Sell all items in the player's inventory, priced using the config
+    aliases: [s,sellall]
+  SimpleGenerators:
+    description: General plugin information and commands
+    aliases: [sg,simplegens,simplegenerators,sgens]
+depend:
+  - Vault
+permissions:
+  simplegenerators.admin.reload:
+    description: Allows a player to reload the plugin

@@ -1,0 +1,58 @@
+drop_frequency: 100 #In ticks
+max_gen: 1 #The best gen
+generate_offline: false
+generators:
+  1: #All generator names must be numbers, and should be ordered by "bettrnes", with the worse one being 1 and the best being the highest.
+    name: "&6&lExample Gen"
+    block: "minecraft:example"
+    drop: "minecraft:example_item"
+    upgrade_price: 500
+items: #For the /sell command
+  example_item:
+    sell_price: 50
+sellwands:
+  x1Sellwand: #The name doesn't matter
+    name: "x1 Sell wand"
+    item: "minecraft:blaze_rod"
+    multiplier: 1
+
+#Messages for example
+#Possible types: message,title,actionbar,none
+#if the type is message you need the "message" field
+#if the type is title you need the "title","subtitle","fade_in","stay" and "fade_out" fields
+#if the type is actionbar you need "contents" field
+#if the type is none you don't need any fields
+#you can use the %n% and %a% in the sell_with_command and sell_with_wand, %n% is the amount of items sold, and %a% is the sell price
+messages:
+  gen_place:
+    type: "message"
+    message: "&bYou placed a gen!"
+  gen_break:
+    type: "none"
+  max_gen:
+    type: "title"
+    title: "&4Maximum gens reached"
+    subtitle: "&eUpgrade by buying new ranks!"
+    fade_in: 5
+    stay: 10
+    fade_out: 5
+  highest_gen:
+    type: "actionbar"
+    contents: "&bYou can't upgrade this gen anymore"
+  gen_upgrade:
+    type: "message"
+    message: "&aYou upgraded your generator!"
+  cant_sell_contents:
+    type: "actionbar"
+    contents: "&4You don't have permission to sell the contents of this chest!"
+  not_enough_money:
+    type: "message"
+    message: "&8You don't have enough money to upgrade this generator!"
+  sell_with_command:
+    type: "title"
+    title: "&bYou sold &e%n% &bitems for &e%a%&b$!"
+    subtitle: ""
+  sell_with_wand:
+    type: "title"
+    title: "&bYou sold &e%n% &bitems for &e%a%&b$!"
+    subtitle: ""

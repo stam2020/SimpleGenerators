@@ -83,22 +83,8 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
             if (placedBlock.getType().equals(Material.matchMaterial(currentGen.getString("block")))){
                 if (heldItem.getDisplayName().equals(ChatColor.translateAlternateColorCodes('&',currentGen.getString("name")))){
                     try {
-                        String countGensQuery = "SELECT count(*) FROM gens WHERE placer=\""+player.getUniqueId().toString()+"\"";
-                        Statement countGensStmt = conn.createStatement();
-                        ResultSet countGens = countGensStmt.executeQuery(countGensQuery);
-                        countGens.next();
-                        int genPlaced = countGens.getInt(1);
-                        while (countGens.next()){
-                            getLogger().info(countGens.getString("type"));
-                        }
-                        int maxGens = 0;
-                        Iterator<PermissionAttachmentInfo> perms = player.getEffectivePermissions().iterator();
-                        while (perms.hasNext()){
-                            PermissionAttachmentInfo perm = perms.next();
-                            if (perm.getPermission().startsWith("simplegenerators.max_gens.")){
-                                maxGens = Math.max(maxGens,Integer.parseInt(perm.getPermission().substring(26)));
-                            }
-                        }
+                        int genPlaced = getPlacedGens(player);
+                        int maxGens = getMaxGens(player);
                         if (genPlaced <= maxGens-1) {
 
                             String query = "INSERT INTO gens(location,type,placer) values(?,?,?)";
@@ -107,7 +93,10 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                             stmt.setString(2, gen);
                             stmt.setString(3, player.getUniqueId().toString());
                             stmt.execute();
-                            executeMessage(getConfig().getConfigurationSection("messages.gen_place"),player,new HashMap<>());
+                            HashMap<String,String> env = new HashMap<>();
+                            env.put("l",Integer.toString(genPlaced));
+                            env.put("m",Integer.toString(maxGens));
+                            executeMessage(getConfig().getConfigurationSection("messages.gen_place"),player,env);
                         }else{
                             executeMessage(getConfig().getConfigurationSection("messages.max_gen"),player,new HashMap<>());
                             e.setCancelled(true);
@@ -173,6 +162,11 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                             String deletionQuery = "DELETE FROM gens WHERE location='" + brokenBlockLocation + "'";
                             PreparedStatement delete = conn.prepareStatement(deletionQuery);
                             delete.execute();
+                            HashMap<String,String> env = new HashMap<>();
+                            int genPlaced = getPlacedGens(player);
+                            int maxGens = getMaxGens(player);
+                            env.put("l",Integer.toString(genPlaced));
+                            env.put("m",Integer.toString(maxGens));
                             executeMessage(getConfig().getConfigurationSection("messages.gen_break"),player,new HashMap<>());
                             break;
                         }else if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
@@ -340,6 +334,24 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
             message = message.replace("%"+key+"%",env.get(key));
         }
         return message;
+    }
+    private int getMaxGens(Player player){
+        int maxGens = 0;
+        Iterator<PermissionAttachmentInfo> perms = player.getEffectivePermissions().iterator();
+        while (perms.hasNext()){
+            PermissionAttachmentInfo perm = perms.next();
+            if (perm.getPermission().startsWith("simplegenerators.max_gens.")){
+                maxGens = Math.max(maxGens,Integer.parseInt(perm.getPermission().substring(26)));
+            }
+        }
+        return maxGens;
+    }
+    private int getPlacedGens(Player player) throws SQLException {
+        String countGensQuery = "SELECT count(*) FROM gens WHERE placer=\""+player.getUniqueId().toString()+"\"";
+        Statement countGensStmt = conn.createStatement();
+        ResultSet countGens = countGensStmt.executeQuery(countGensQuery);
+        countGens.next();
+        return countGens.getInt(1);
     }
     public void onEnableRun(){
         generators = getConfig().getConfigurationSection("generators");

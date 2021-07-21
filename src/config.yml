@@ -23,10 +23,11 @@ sellwands:
 #if the type is actionbar you need "contents" field
 #if the type is none you don't need any fields
 #you can use the %n% and %a% in the sell_with_command and sell_with_wand, %n% is the amount of items sold, and %a% is the sell price
+#you can use the %l% and %m% in the gen_place and gen_break, %l% is the amount of gens the player placed and %m% is their max gens
 messages:
   gen_place:
     type: "message"
-    message: "&bYou placed a gen!"
+    message: "&bYou placed a gen! %l%/%m%"
   gen_break:
     type: "none"
   max_gen:

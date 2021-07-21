@@ -30,6 +30,9 @@ messages:
     message: "&bYou placed a gen! %l%/%m%"
   gen_break:
     type: "none"
+  cant_break:
+    type: "actionbar"
+    contents: "&5You can't break this gen as it is not yours"
   max_gen:
     type: "title"
     title: "&4Maximum gens reached"

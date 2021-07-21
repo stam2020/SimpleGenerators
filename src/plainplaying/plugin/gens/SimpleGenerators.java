@@ -192,6 +192,9 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                                 }
                             }
                         }
+                    }else{
+                        e.setCancelled(true);
+                        executeMessage(getConfig().getConfigurationSection("message.cant_break"),player,new HashMap<>());
                     }
                 }
 

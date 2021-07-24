@@ -93,7 +93,7 @@ This section should list any major frameworks that you built your project using.
 <!-- GETTING STARTED -->
 ## Getting Started
 
-To download the plugin, visit [SimpleGenerators](https://google.com)
+To download the plugin, visit [SimpleGenerators](https://www.spigotmc.org/resources/simplegenerators.94621/)
 
 ### Prerequisites
 

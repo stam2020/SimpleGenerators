@@ -26,18 +26,13 @@ import oshi.util.tuples.Pair;
 
 import java.io.File;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class SimpleGenerators extends JavaPlugin implements Listener {
     private final File configFile = new File(getDataFolder(),"config.yml");
     private Connection conn;
     private Statement stmtExecutor;
-    public String host, database, username, password;
-    public int port;
     private ConfigurationSection generators;
     private static Economy eco;
     public static Logger logger;
@@ -104,7 +99,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         for (String gen : generators.getKeys(false)){
             ConfigurationSection currentGen = getConfig().getConfigurationSection("generators."+gen);
             if (placedBlock.getType().equals(Material.matchMaterial(currentGen.getString("block")))){
-                if (heldItem.getDisplayName().equals(ChatColor.translateAlternateColorCodes('&',currentGen.getString("name")))){
+                if (heldItem.getDisplayName().equals(ChatColor.translateAlternateColorCodes('&',currentGen.getString("name"))) && heldItem.getLore().get(0).equals(ChatColor.translateAlternateColorCodes('&',currentGen.getString("lore")))){
                     try {
                         int genPlaced = getPlacedGens(player);
                         int maxGens = getMaxGens(player);
@@ -179,6 +174,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                                 ItemStack genItem = new ItemStack(Material.matchMaterial(itemInfo.getString("block")));
                                 ItemMeta genItemMeta = genItem.getItemMeta();
                                 genItemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemInfo.getString("name")));
+                                genItemMeta.setLore(Collections.singletonList(ChatColor.translateAlternateColorCodes('&',itemInfo.getString("lore"))));
                                 genItem.setItemMeta(genItemMeta);
                                 giveItemsNaturally(player, genItem, e.getClickedBlock().getLocation());
                                 String deletionQuery = "DELETE FROM gens WHERE location='" + blockLocation + "'";
@@ -217,7 +213,6 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                         } else {
                             if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
                                 e.setCancelled(true);
-                                getLogger().info(placer);
                                 executeMessage(getConfig().getConfigurationSection("messages.cant_break"), player, new HashMap<>());
                             } else if (e.getAction() == Action.RIGHT_CLICK_BLOCK && player.isSneaking()) {
                                 e.setCancelled(true);
@@ -293,7 +288,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         int firstAvailable = playerInv.firstEmpty();
         for (ItemStack item : playerInv) {
             if (item != null) {
-                if (item.isSimilar(items) && item.getItemMeta().getDisplayName().equals(items.getItemMeta().getDisplayName())) {
+                if (item.isSimilar(items) && item.getItemMeta().getDisplayName().equals(items.getItemMeta().getDisplayName()) && item.getItemMeta().getLore().equals(items.getItemMeta().getLore())) {
                     int newAmount = item.getAmount() + items.getAmount();
                     if (newAmount <= 64) {
                         item.setAmount(newAmount);
@@ -338,7 +333,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         switch (message.getString("type")){
             case "message" -> player.sendMessage(ChatColor.translateAlternateColorCodes('&',translateEnv(message.getString("message"),env)));
             case "title" ->  player.sendTitle(ChatColor.translateAlternateColorCodes('&',translateEnv(message.getString("title"),env)),ChatColor.translateAlternateColorCodes('&',translateEnv(message.getString("subtitle"),env)),message.getInt("fade_in"),message.getInt("stay"),message.getInt("fade_out"));
-            case "actionbar" -> {getLogger().info("yes");player.spigot().sendMessage(ChatMessageType.ACTION_BAR,new TextComponent(ChatColor.translateAlternateColorCodes('&',translateEnv(message.getString("contents"),env))));}
+            case "actionbar" -> {player.spigot().sendMessage(ChatMessageType.ACTION_BAR,new TextComponent(ChatColor.translateAlternateColorCodes('&',translateEnv(message.getString("contents"),env))));}
             case "none" -> {}
         }
     }

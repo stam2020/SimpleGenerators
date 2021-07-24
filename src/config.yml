@@ -4,6 +4,7 @@ generate_offline: false
 generators:
   1: #All generator names must be numbers, and should be ordered by "bettrnes", with the worse one being 1 and the best being the highest.
     name: "&6&lExample Gen"
+    lore: "&7&lSome lore for the item"
     block: "minecraft:example"
     drop: "minecraft:example_item"
     upgrade_price: 500

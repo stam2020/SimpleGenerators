@@ -98,7 +98,7 @@ To download the plugin, visit [SimpleGenerators](https://www.spigotmc.org/resour
 
 Requires the following plugins:
 * [Vault](https://dev.bukkit.org/projects/vault)
-* Any economy plugin, such as Essentials
+* Any economy plugin, such as [Essentials](https://www.spigotmc.org/resources/essentialsx.9089/)
 
 <!-- USAGE EXAMPLES -->
 ## Usage

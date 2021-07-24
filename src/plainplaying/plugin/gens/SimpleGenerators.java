@@ -4,10 +4,7 @@ package plainplaying.plugin.gens;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.configuration.ConfigurationSection;
@@ -36,8 +33,9 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 public class SimpleGenerators extends JavaPlugin implements Listener {
-    private File configFile = new File(getDataFolder(),"config.yml");
+    private final File configFile = new File(getDataFolder(),"config.yml");
     private Connection conn;
+    private Statement stmtExecutor;
     public String host, database, username, password;
     public int port;
     private ConfigurationSection generators;
@@ -64,7 +62,32 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         getCommand("sell").setExecutor(new CommandHandler(eco));
         getCommand("SimpleGenerators").setExecutor(new CommandHandler(eco));
         getCommand("SimpleGenerators").setTabCompleter(new CommandHandler(eco));
-        mysqlSetup();
+        try {
+            Class.forName("org.sqlite.JDBC");
+            conn = DriverManager.getConnection("jdbc:sqlite:info.db");
+            stmtExecutor = conn.createStatement();
+        } catch ( Exception e ) {
+            getLogger().severe(e.getStackTrace().toString());
+            conn = null;
+        }
+        String generateGens = "CREATE TABLE IF NOT EXISTS gens(" +
+                "location TEXT," +
+                "type TEXT," +
+                "placer TEXT" +
+                ");";
+        String generateChests = "CREATE TABLE IF NOT EXISTS chests(" +
+                "location TEXT," +
+                "player TEXT" +
+                ");";
+        try {
+            stmtExecutor.executeUpdate(generateGens);
+            stmtExecutor.executeUpdate(generateChests);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        //mysqlSetup();
+        //db = new SQLite(this);
+       // db.load();
         getServer().getPluginManager().registerEvents(this,this);
         onEnableRun();
     }
@@ -86,7 +109,6 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                         int genPlaced = getPlacedGens(player);
                         int maxGens = getMaxGens(player);
                         if (genPlaced <= maxGens-1) {
-
                             String query = "INSERT INTO gens(location,type,placer) values(?,?,?)";
                             PreparedStatement stmt = conn.prepareStatement(query);
                             stmt.setString(1, parseLocation(placedBlock.getLocation()));
@@ -140,61 +162,68 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         Player player = e.getPlayer();
         ItemStack mainHandItem = player.getInventory().getItemInMainHand();
         if (e.getClickedBlock() != null) {
-            String brokenBlockLocation = parseLocation(e.getClickedBlock().getLocation());
+            String blockLocation = parseLocation(e.getClickedBlock().getLocation());
             try {
                 String query = "SELECT location,type,placer FROM gens";
-                Statement stmt = conn.createStatement();
-                ResultSet ans = stmt.executeQuery(query);
+                ResultSet ans = stmtExecutor.executeQuery(query);
                 while (ans.next()) {
                     String location = ans.getString("location");
                     String placer = ans.getString("placer");
                     int type = ans.getInt("type");
-                    if (location.equals(brokenBlockLocation) && placer.equals(player.getUniqueId().toString())) {
-                        if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
-                            e.getClickedBlock().setType(Material.AIR);
-                            e.setCancelled(true);
-                            ConfigurationSection itemInfo = getConfig().getConfigurationSection("generators." + type);
-                            ItemStack genItem = new ItemStack(Material.matchMaterial(itemInfo.getString("block")));
-                            ItemMeta genItemMeta = genItem.getItemMeta();
-                            genItemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemInfo.getString("name")));
-                            genItem.setItemMeta(genItemMeta);
-                            giveItemsNaturally(player, genItem, e.getClickedBlock().getLocation());
-                            String deletionQuery = "DELETE FROM gens WHERE location='" + brokenBlockLocation + "'";
-                            PreparedStatement delete = conn.prepareStatement(deletionQuery);
-                            delete.execute();
-                            HashMap<String,String> env = new HashMap<>();
-                            int genPlaced = getPlacedGens(player);
-                            int maxGens = getMaxGens(player);
-                            env.put("l",Integer.toString(genPlaced));
-                            env.put("m",Integer.toString(maxGens));
-                            executeMessage(getConfig().getConfigurationSection("messages.gen_break"),player,new HashMap<>());
-                            break;
-                        }else if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
-                            if (player.isSneaking()) {
-                                if (System.currentTimeMillis() - (lastClickDelay.containsKey(player) ? lastClickDelay.get(player) : 0) > 100) {
-                                    lastClickDelay.put(player, System.currentTimeMillis());
-                                    if (eco.getBalance(player) >= getConfig().getInt("generators."+type+".upgrade_price")) {
-                                        eco.withdrawPlayer(player, getConfig().getInt("generators."+type+".upgrade_price"));
-                                        if (getConfig().getInt("max_gen") == type) {
-                                            executeMessage(getConfig().getConfigurationSection("messages.highest_gen"),player,new HashMap<>());
-                                            return;
+                    if (location.equals(blockLocation)) {
+                        if (placer.equals(player.getUniqueId().toString())) {
+                            if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+                                e.getClickedBlock().setType(Material.AIR);
+                                e.setCancelled(true);
+                                ConfigurationSection itemInfo = getConfig().getConfigurationSection("generators." + type);
+                                ItemStack genItem = new ItemStack(Material.matchMaterial(itemInfo.getString("block")));
+                                ItemMeta genItemMeta = genItem.getItemMeta();
+                                genItemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemInfo.getString("name")));
+                                genItem.setItemMeta(genItemMeta);
+                                giveItemsNaturally(player, genItem, e.getClickedBlock().getLocation());
+                                String deletionQuery = "DELETE FROM gens WHERE location='" + blockLocation + "'";
+                                PreparedStatement delete = conn.prepareStatement(deletionQuery);
+                                delete.execute();
+                                HashMap<String, String> env = new HashMap<>();
+                                int genPlaced = getPlacedGens(player);
+                                int maxGens = getMaxGens(player);
+                                env.put("l", Integer.toString(genPlaced));
+                                env.put("m", Integer.toString(maxGens));
+                                executeMessage(getConfig().getConfigurationSection("messages.gen_break"), player, new HashMap<>());
+                                break;
+                            } else if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
+                                if (player.isSneaking()) {
+                                    if (System.currentTimeMillis() - (lastClickDelay.containsKey(player) ? lastClickDelay.get(player) : 0) > 100) {
+                                        lastClickDelay.put(player, System.currentTimeMillis());
+                                        if (eco.getBalance(player) >= getConfig().getInt("generators." + type + ".upgrade_price") || getConfig().getInt("max_gen") == type) {
+                                            eco.withdrawPlayer(player, getConfig().getInt("generators." + type + ".upgrade_price"));
+                                            if (getConfig().getInt("max_gen") == type) {
+                                                executeMessage(getConfig().getConfigurationSection("messages.highest_gen"), player, new HashMap<>());
+                                                return;
+                                            }
+                                            e.getClickedBlock().setType(Material.matchMaterial(getConfig().getString("generators." + (type + 1) + ".block")));
+                                            String genUpdate = "UPDATE gens SET type=? WHERE location=?";
+                                            PreparedStatement update = conn.prepareStatement(genUpdate);
+                                            update.setInt(1, type + 1);
+                                            update.setString(2, location);
+                                            update.execute();
+                                            executeMessage(getConfig().getConfigurationSection("messages.gen_upgrade"), player, new HashMap<>());
+                                        } else {
+                                            executeMessage(getConfig().getConfigurationSection("messages.not_enough_money"), player, new HashMap<>());
                                         }
-                                        e.getClickedBlock().setType(Material.matchMaterial(getConfig().getString("generators." + (type + 1) + ".block")));
-                                        String genUpdate = "UPDATE gens SET type=? WHERE location=?";
-                                        PreparedStatement update = conn.prepareStatement(genUpdate);
-                                        update.setInt(1, type + 1);
-                                        update.setString(2, location);
-                                        update.execute();
-                                        executeMessage(getConfig().getConfigurationSection("messages.gen_upgrade"),player,new HashMap<>());
-                                    }else{
-                                        executeMessage(getConfig().getConfigurationSection("messages.not_enough_money"),player,new HashMap<>());
                                     }
                                 }
                             }
+                        } else {
+                            if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+                                e.setCancelled(true);
+                                getLogger().info(placer);
+                                executeMessage(getConfig().getConfigurationSection("messages.cant_break"), player, new HashMap<>());
+                            } else if (e.getAction() == Action.RIGHT_CLICK_BLOCK && player.isSneaking()) {
+                                e.setCancelled(true);
+                                executeMessage(getConfig().getConfigurationSection("messages.cant_upgrade"), player, new HashMap<>());
+                            }
                         }
-                    }else{
-                        e.setCancelled(true);
-                        executeMessage(getConfig().getConfigurationSection("message.cant_break"),player,new HashMap<>());
                     }
                 }
 
@@ -209,8 +238,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                     if (e.getClickedBlock().getType() == Material.CHEST){
                         try {
                             String getPlacer = "SELECT player FROM chests WHERE location=\""+parseLocation(e.getClickedBlock().getLocation())+"\"";
-                            Statement getPlacerStmt = conn.createStatement();
-                            ResultSet ans = getPlacerStmt.executeQuery(getPlacer);
+                            ResultSet ans = stmtExecutor.executeQuery(getPlacer);
                             ans.next();
                             String placerUUID = ans.getString("player");
                             Player placer = getServer().getPlayer(UUID.fromString(placerUUID));
@@ -234,24 +262,6 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
     }
     public static SimpleGenerators getInstance(){
         return instance;
-    }
-    public void mysqlSetup(){
-        host = "localhost";
-        port = 3306;
-        username = "root";
-        database = "SimpleGenerators";
-        password = "";
-        try{
-            synchronized (this) {
-                if (getConn() != null && !getConn().isClosed()) {
-                    return;
-                }
-                Class.forName("com.mysql.jdbc.Driver");
-                setConn(DriverManager.getConnection("jdbc:mysql://"+host+":"+port+"/"+database,"root",""));
-            }
-        } catch (SQLException | ClassNotFoundException throwables) {
-            throwables.printStackTrace();
-        }
     }
     private boolean setupEconomy() {
         if (getServer().getPluginManager().getPlugin("Vault") == null) {
@@ -351,8 +361,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
     }
     private int getPlacedGens(Player player) throws SQLException {
         String countGensQuery = "SELECT count(*) FROM gens WHERE placer=\""+player.getUniqueId().toString()+"\"";
-        Statement countGensStmt = conn.createStatement();
-        ResultSet countGens = countGensStmt.executeQuery(countGensQuery);
+        ResultSet countGens = stmtExecutor.executeQuery(countGensQuery);
         countGens.next();
         return countGens.getInt(1);
     }
@@ -372,8 +381,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         id = getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> {
             try {
                 String query = "SELECT location,type,placer FROM gens";
-                Statement gensGetter = conn.createStatement();
-                ResultSet gens = gensGetter.executeQuery(query);
+                ResultSet gens = stmtExecutor.executeQuery(query);
                 while (gens.next()){
                     OfflinePlayer playerGen = getServer().getOfflinePlayer(UUID.fromString(gens.getString("placer")));
                     if (offlineGeneration || playerGen.isOnline()) {

@@ -33,6 +33,9 @@ messages:
   cant_break:
     type: "actionbar"
     contents: "&5You can't break this gen as it is not yours!"
+  cant_upgrade:
+      type: "actionbar"
+      contents: "&5You can't upgrade this gen as it is not yours!"
   max_gen:
     type: "title"
     title: "&4Maximum gens reached"

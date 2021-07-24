@@ -31,8 +31,6 @@
   <p align="center">
     Make generator servers easily!
     <br />
-    <a href="https://github.com/stam2020/SimpleGenerators"><strong>Explore the docs »</strong></a>
-    <br />
     <br />
     <a href="https://github.com/stam2020/SimpleGenerators/issues">Report Bug</a>
     ·

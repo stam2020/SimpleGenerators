@@ -99,7 +99,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         for (String gen : generators.getKeys(false)){
             ConfigurationSection currentGen = getConfig().getConfigurationSection("generators."+gen);
             if (placedBlock.getType().equals(Material.matchMaterial(currentGen.getString("block")))){
-                if (heldItem.getDisplayName().equals(ChatColor.translateAlternateColorCodes('&',currentGen.getString("name"))) && heldItem.getLore().get(0).equals(ChatColor.translateAlternateColorCodes('&',currentGen.getString("lore")))){
+                if (heldItem.getDisplayName().equals(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(currentGen.getString("name")))) && (currentGen.getString("lore").isEmpty() || (heldItem.hasLore() && (heldItem.getLore().get(0).equals(ChatColor.translateAlternateColorCodes('&', currentGen.getString("lore"))))))){
                     try {
                         int genPlaced = getPlacedGens(player);
                         int maxGens = getMaxGens(player);
@@ -111,7 +111,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                             stmt.setString(3, player.getUniqueId().toString());
                             stmt.execute();
                             HashMap<String,String> env = new HashMap<>();
-                            env.put("l",Integer.toString(genPlaced));
+                            env.put("l",Integer.toString(genPlaced+1));
                             env.put("m",Integer.toString(maxGens));
                             executeMessage(getConfig().getConfigurationSection("messages.gen_place"),player,env);
                         }else{
@@ -174,7 +174,9 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                                 ItemStack genItem = new ItemStack(Material.matchMaterial(itemInfo.getString("block")));
                                 ItemMeta genItemMeta = genItem.getItemMeta();
                                 genItemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemInfo.getString("name")));
-                                genItemMeta.setLore(Collections.singletonList(ChatColor.translateAlternateColorCodes('&',itemInfo.getString("lore"))));
+                                if (itemInfo.contains("lore")) {
+                                    genItemMeta.setLore(Collections.singletonList(ChatColor.translateAlternateColorCodes('&', itemInfo.getString("lore"))));
+                                }
                                 genItem.setItemMeta(genItemMeta);
                                 giveItemsNaturally(player, genItem, e.getClickedBlock().getLocation());
                                 String deletionQuery = "DELETE FROM gens WHERE location='" + blockLocation + "'";

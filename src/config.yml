@@ -2,9 +2,9 @@ drop_frequency: 100 #In ticks
 max_gen: 1 #The best gen
 generate_offline: false
 generators:
-  1: #All generator names must be numbers, and should be ordered by "bettrnes", with the worse one being 1 and the best being the highest.
+  1: #All generator names must be numbers, and should be ordered by "bitterness", with the worse one being 1 and the best being the highest.
     name: "&6&lExample Gen"
-    lore: "&7&lSome lore for the item"
+    lore: "&7&lSome lore for the item" #Make this field empty if you want the item to have no lore
     block: "minecraft:example"
     drop: "minecraft:example_item"
     upgrade_price: 500
@@ -60,7 +60,13 @@ messages:
     type: "title"
     title: "&bYou sold &e%n% &bitems for &e%a%&b$!"
     subtitle: ""
+    fade_in: 5
+    stay: 10
+    fade_out: 5
   sell_with_wand:
     type: "title"
     title: "&bYou sold &e%n% &bitems for &e%a%&b$!"
     subtitle: ""
+    fade_in: 5
+    stay: 10
+    fade_out: 5

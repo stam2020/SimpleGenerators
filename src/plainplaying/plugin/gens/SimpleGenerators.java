@@ -235,10 +235,9 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                             String getPlacer = "SELECT player FROM chests WHERE location=\""+parseLocation(e.getClickedBlock().getLocation())+"\"";
                             ResultSet ans = stmtExecutor.executeQuery(getPlacer);
                             ans.next();
-                            String placerUUID = ans.getString("player");
-                            Player placer = getServer().getPlayer(UUID.fromString(placerUUID));
+                            String placer = ans.getString("player");
                             e.setCancelled(true);
-                            if (placer.equals(player)) {
+                            if (placer.equals(player.getUniqueId().toString())) {
                                 Pair<Integer, Integer> answerData = sellInventory(((Container) e.getClickedBlock().getState()).getInventory(), eco, player, currentSellwand.getInt("multiplier"));
                                 HashMap<String,String> env = new HashMap<>();
                                 env.put("a",answerData.getA().toString());

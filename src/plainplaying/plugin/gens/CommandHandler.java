@@ -37,7 +37,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
                     }
                 }
                 case "credits" -> player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&bPlugin made by &2PlainPlaying"));
-                case "info" -> player.sendMessage(ChatColor.translateAlternateColorCodes('&',"Currently running version &81.0.0"));
+                case "info" -> player.sendMessage(ChatColor.translateAlternateColorCodes('&',"Currently running version &81.1"));
             }
         }
         return true;

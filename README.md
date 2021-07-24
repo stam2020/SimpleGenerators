@@ -82,9 +82,10 @@ I hope that you will find this plugin useful!
 
 ### Built With
 
-This section should list any major frameworks that you built your project using. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
+This plugin is built using
 * [Java](https://www.java.com/en/)
 * [Spigot](https://www.spigotmc.org/)
+* [SQLite](https://www.sqlite.org/index.html)
 
 
 

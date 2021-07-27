@@ -39,6 +39,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
     public static FileConfiguration config;
     private static boolean offlineGeneration;
     private static SimpleGenerators instance;
+    int max_gen;
     HashMap<Player,Long> lastClickDelay = new HashMap<>();
     int id;
     @Override
@@ -193,9 +194,9 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                                 if (player.isSneaking()) {
                                     if (System.currentTimeMillis() - (lastClickDelay.containsKey(player) ? lastClickDelay.get(player) : 0) > 100) {
                                         lastClickDelay.put(player, System.currentTimeMillis());
-                                        if (eco.getBalance(player) >= getConfig().getInt("generators." + type + ".upgrade_price") || getConfig().getInt("max_gen") == type) {
+                                        if (eco.getBalance(player) >= getConfig().getInt("generators." + type + ".upgrade_price") || max_gen == type) {
                                             eco.withdrawPlayer(player, getConfig().getInt("generators." + type + ".upgrade_price"));
-                                            if (getConfig().getInt("max_gen") == type) {
+                                            if (max_gen == type) {
                                                 executeMessage(getConfig().getConfigurationSection("messages.highest_gen"), player, new HashMap<>());
                                                 return;
                                             }
@@ -368,6 +369,10 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
             saveDefaultConfig();
         }
         this.reloadConfig();
+        max_gen = 0;
+        for (String configurationSection : getConfig().getConfigurationSection("generators").getKeys(false)){
+            max_gen = Math.max(max_gen,Integer.parseInt(configurationSection));
+        }
         offlineGeneration = getConfig().getBoolean("generate_offline");
         logger = getLogger();
         config = getConfig();

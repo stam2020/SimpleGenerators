@@ -1,20 +1,3 @@
-<!--
-*** Thanks for checking out the Best-README-Template. If you have a suggestion
-*** that would make this better, please fork the repo and create a pull request
-*** or simply open an issue with the tag "enhancement".
-*** Thanks again! Now go create something AMAZING! :D
--->
-
-
-
-<!-- PROJECT SHIELDS -->
-<!--
-*** I'm using markdown "reference style" links for readability.
-*** Reference links are enclosed in brackets [ ] instead of parentheses ( ).
-*** See the bottom of this document for the declaration of the reference variables
-*** for contributors-url, forks-url, etc. This is an optional, concise syntax you may use.
-*** https://www.markdownguide.org/basic-syntax/#reference-style-links
--->
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
 [![Stargazers][stars-shield]][stars-url]
@@ -23,7 +6,6 @@
 
 
 
-<!-- PROJECT LOGO -->
 <br />
 <p align="center">
   <h3 align="center">Simple Generators</h3>
@@ -39,8 +21,6 @@
 </p>
 
 
-
-<!-- TABLE OF CONTENTS -->
 <details open="open">
   <summary>Table of Contents</summary>
   <ol>
@@ -66,7 +46,7 @@
 
 
 
-<!-- ABOUT THE PROJECT -->
+
 ## About The Project
 
 I always believe that everything should be simple.
@@ -89,7 +69,7 @@ This plugin is built using
 
 
 
-<!-- GETTING STARTED -->
+
 ## Getting Started
 
 To download the plugin, visit [SimpleGenerators](https://www.spigotmc.org/resources/simplegenerators.94621/)
@@ -100,25 +80,58 @@ Requires the following plugins:
 * [Vault](https://dev.bukkit.org/projects/vault)
 * Any economy plugin, such as [Essentials](https://www.spigotmc.org/resources/essentialsx.9089/)
 
-<!-- USAGE EXAMPLES -->
+
 ## Usage
 
-You can create generators and sellwands in the config.
-To reload the config use 
+To define a new generator, under the generator field in the config add the rank of the generator, and under it the information. For example:
+```yaml
+1:
+    name: "My First Generator!"
+    lore: "The lore for your generator"
+    block: "minecraft:cake"
+    drop: "minecraft:candle"
+    upgrade_price: 500
+```
+This will create a generator made of cake called "My First Generator!" with the lore "The lore for your generator" that generates candles, and costs 500 to upgrade.
+
+To define a new sellable item, under the items field in the config add the id of the sellable item, and under it the information. For example:
+```yaml
+candle:
+    sell_price: 20
+```
+This will make the candle item sell for 20.
+
+To define a sellwand, under the sellwands field in the config, add any name you want for the sellwand, and under it the information. For example:
+ 
+```yaml
+x3SellWand:
+    name: "My First Sellwand!"
+    item: "minecraft:blaze_rod"
+    multiplier: 3
+```
+This will create a blaze rod sellwand, called "My First Sellwand!", with a sell mutiplier of 3.
+
+To change the frequency of the drops of the generators, change the drop_frequency field in the config. For example:
+```yaml
+drop_frequency: 100
+```
+Will make generators drop every 100 ticks, meaning 5 seconds.
+
+If you want to require players to be on the server for their generators to work, set the field generate_offline to false. Be careful, turning it to true might cause alot of lagg!
+ 
+To reload the config ingame, run:
 ```sh
 /simplegenerators reload
 ```
 
 
 
-<!-- ROADMAP -->
 ## Roadmap
 
 See the [open issues](https://github.com/stam2020/SimpleGenerators/issues) for a list of proposed features (and known issues).
 
 
 
-<!-- CONTRIBUTING -->
 ## Contributing
 
 All contributions are appreciated and help a-lot!
@@ -133,14 +146,14 @@ How to contribute:
 
 
 
-<!-- LICENSE -->
+
 ## License
 
 Distributed under the GNU License. See `LICENSE` for more information.
 
 
 
-<!-- CONTACT -->
+
 ## Contact
 
 Discord - **PlainPlaying#2283**
@@ -149,8 +162,6 @@ Project Link: [https://github.com/stam2020/SimpleGenerators](https://github.com/
 
 
 
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [contributors-shield]: https://img.shields.io/github/contributors/stam2020/SimpleGenerators.svg?style=for-the-badge
 [contributors-url]: https://github.com/stam2020/SimpleGenerators/graphs/contributors
 [forks-shield]: https://img.shields.io/github/forks/stam2020/SimpleGenerators.svg?style=for-the-badge

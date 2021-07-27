@@ -1,5 +1,4 @@
 drop_frequency: 100 #In ticks
-max_gen: 1 #The best gen
 generate_offline: false
 generators:
   1: #All generator names must be numbers, and should be ordered by "bitterness", with the worse one being 1 and the best being the highest.

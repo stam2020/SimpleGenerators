@@ -20,7 +20,7 @@
   </p>
 </p>
 
-
+Make sure to read this carfuly before starting your project!
 <details open="open">
   <summary>Table of Contents</summary>
   <ol>

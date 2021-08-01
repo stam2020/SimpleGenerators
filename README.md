@@ -117,7 +117,7 @@ drop_frequency: 100
 ```
 Will make generators drop every 100 ticks, meaning 5 seconds.
 
-If you want to require players to be on the server for their generators to work, set the field ```generate_offline``` to false. Be careful, turning it to true might cause alot of lagg!
+If you want to require players to be on the server for their generators to work, set the field ```generate_offline``` to false. Be careful, turning it to true might cause alot of lag!
  
 You can also limit the maximum amount of generators a player can place down, by giving them or their rank the permission node: ```SimpleGenerators.max_gen.NUMBER```. For example the permission node ```SimpleGenerators.max_gen.5``` will allow them to place down 5 generators.
  

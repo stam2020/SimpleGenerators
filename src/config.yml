@@ -10,9 +10,12 @@ generators:
 items: #For the /sell command
   example_item:
     sell_price: 50
+    name: "&fExample" #Leave empty for default name
+    lore: "&f/sell to sell" #Leave empty for no lore
 sellwands:
   x1Sellwand: #The name doesn't matter
     name: "x1 Sell wand"
+    lore: "&cRight click a chest to sell its content"
     item: "minecraft:blaze_rod"
     multiplier: 1
 

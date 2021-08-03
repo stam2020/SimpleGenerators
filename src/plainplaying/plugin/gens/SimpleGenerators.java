@@ -232,7 +232,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK){
             for (String sellwand : getConfig().getConfigurationSection("sellwands").getKeys(false)) {
                 ConfigurationSection currentSellwand = getConfig().getConfigurationSection("sellwands."+sellwand);
-                if (mainHandItem.getType().equals(Material.matchMaterial(currentSellwand.getString("item"))) && mainHandItem.getItemMeta().getDisplayName().equals(ChatColor.translateAlternateColorCodes('&',currentSellwand.getString("name")))){
+                if (mainHandItem.getType().equals(Material.matchMaterial(currentSellwand.getString("item"))) && Objects.requireNonNull(mainHandItem.getItemMeta()).getDisplayName().equals(ChatColor.translateAlternateColorCodes('&',currentSellwand.getString("name"))) && (currentSellwand.getString("lore").isEmpty() || Objects.requireNonNull(mainHandItem.getItemMeta().getLore()).get(0).equals(ChatColor.translateAlternateColorCodes('&',currentSellwand.getString("lore"))))){
                     if (e.getClickedBlock().getType() == Material.CHEST){
                         try {
                             String getPlacer = "SELECT player FROM chests WHERE location=\""+parseLocation(e.getClickedBlock().getLocation())+"\"";
@@ -320,7 +320,12 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
             if (item != null) {
                 String itemId = item.getType().name();
                 for (String sellableItem : sellableItems) {
-                    if (itemId.equalsIgnoreCase(sellableItem)) {
+                    ConfigurationSection currentItem = SimpleGenerators.config.getConfigurationSection("items."+sellableItem);
+                    if (itemId.equalsIgnoreCase(sellableItem)
+                            && (currentItem.getString("name").isEmpty() ||
+                            Objects.requireNonNull(item.getItemMeta()).getDisplayName().equals(ChatColor.translateAlternateColorCodes('&',currentItem.getString("name"))))
+                            && (currentItem.getString("lore").isEmpty() ||
+                            Objects.requireNonNull(item.getItemMeta().getLore()).get(0).equals(ChatColor.translateAlternateColorCodes('&',currentItem.getString("lore"))))){
                         itemsSold += item.getAmount();
                         sellPrice += SimpleGenerators.config.getInt("items."+sellableItem+".sell_price")*item.getAmount();
                         item.setAmount(0);
@@ -387,9 +392,14 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                     OfflinePlayer playerGen = getServer().getOfflinePlayer(UUID.fromString(gens.getString("placer")));
                     if (offlineGeneration || playerGen.isOnline()) {
                         ConfigurationSection itemInfo = getConfig().getConfigurationSection("generators." + gens.getString("type"));
+                        ConfigurationSection dropInfo = getConfig().getConfigurationSection("items."+itemInfo.getString("drop").substring(10));
                         Location dropLoc = unparseLocation(gens.getString("location"));
                         dropLoc.add(0, 1, 0);
                         ItemStack drop = new ItemStack(Material.matchMaterial(itemInfo.getString("drop")));
+                        ItemMeta meta = drop.getItemMeta();
+                        if (!dropInfo.getString("name").isEmpty()) meta.setDisplayName(ChatColor.translateAlternateColorCodes('&',dropInfo.getString("name")));
+                        if (!dropInfo.getString("lore").isEmpty()) meta.setLore(Collections.singletonList(ChatColor.translateAlternateColorCodes('&', dropInfo.getString("lore"))));
+                        drop.setItemMeta(meta);
                         dropLoc.getWorld().dropItemNaturally(dropLoc, drop);
                     }
                 }

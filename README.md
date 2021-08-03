@@ -92,14 +92,16 @@ To define a new generator, under the generator field in the config add the rank 
     drop: "minecraft:candle"
     upgrade_price: 500
 ```
-This will create a generator made of cake called "My First Generator!" with the lore "The lore for your generator" that generates candles, and costs 500 to upgrade.
+This will create a generator made of cake called "My First Generator!" with the lore "The lore for your generator" that generates candles (the same candle item from the next paragraph), and costs 500 to upgrade.
 
 To define a new sellable item, under the items field in the config add the id of the sellable item, and under it the information. For example:
 ```yaml
 candle:
     sell_price: 20
+    name: "&6&lCandle"
+    lore: "&7/sell to sell"
 ```
-This will make the candle item sell for 20.
+This will make the candle item sell for 20, be named &6&lCandle, with the lore &7/sell to sell
 
 To define a sellwand, under the sellwands field in the config, add any name you want for the sellwand, and under it the information. For example:
  
@@ -107,9 +109,10 @@ To define a sellwand, under the sellwands field in the config, add any name you 
 x3SellWand:
     name: "My First Sellwand!"
     item: "minecraft:blaze_rod"
+    lore: "&cRight click a chest to sell its content!"
     multiplier: 3
 ```
-This will create a blaze rod sellwand, called "My First Sellwand!", with a sell mutiplier of 3.
+This will create a blaze rod sellwand, called "My First Sellwand!", with the lore "&Right click a chest to sell its content" and with a sell mutiplier of 3.
 
 To change the frequency of the drops of the generators, change the drop_frequency field in the config. For example:
 ```yaml

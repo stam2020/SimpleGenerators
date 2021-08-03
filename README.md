@@ -108,8 +108,8 @@ To define a sellwand, under the sellwands field in the config, add any name you 
 ```yaml
 x3SellWand:
     name: "My First Sellwand!"
-    item: "minecraft:blaze_rod"
     lore: "&cRight click a chest to sell its content!"
+    item: "minecraft:blaze_rod"
     multiplier: 3
 ```
 This will create a blaze rod sellwand, called "My First Sellwand!", with the lore "&Right click a chest to sell its content" and with a sell mutiplier of 3.

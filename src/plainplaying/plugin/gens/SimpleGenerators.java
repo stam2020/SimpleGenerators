@@ -22,7 +22,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.PermissionAttachmentInfo;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import oshi.util.tuples.Pair;
 
 import java.io.File;
 import java.sql.*;

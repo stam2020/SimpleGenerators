@@ -194,11 +194,11 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                                     if (System.currentTimeMillis() - (lastClickDelay.containsKey(player) ? lastClickDelay.get(player) : 0) > 100) {
                                         lastClickDelay.put(player, System.currentTimeMillis());
                                         if (eco.getBalance(player) >= getConfig().getInt("generators." + type + ".upgrade_price") || max_gen == type) {
-                                            eco.withdrawPlayer(player, getConfig().getInt("generators." + type + ".upgrade_price"));
                                             if (max_gen == type) {
                                                 executeMessage(getConfig().getConfigurationSection("messages.highest_gen"), player, new HashMap<>());
                                                 return;
                                             }
+                                            eco.withdrawPlayer(player, getConfig().getInt("generators." + type + ".upgrade_price"));
                                             e.getClickedBlock().setType(Material.matchMaterial(getConfig().getString("generators." + (type + 1) + ".block")));
                                             String genUpdate = "UPDATE gens SET type=? WHERE location=?";
                                             PreparedStatement update = conn.prepareStatement(genUpdate);

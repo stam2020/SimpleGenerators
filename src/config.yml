@@ -1,23 +1,25 @@
 drop_frequency: 100 #In ticks
-generate_offline: false
-generators:
-  1: #All generator names must be numbers, and should be ordered by "bitterness", with the worse one being 1 and the best being the highest.
-    name: "&6&lExample Gen"
-    lore: "&7&lSome lore for the item" #Make this field empty if you want the item to have no lore
-    block: "minecraft:example"
-    drop: "minecraft:example_item"
+generate_offline: false #Run player's generators while they're offline
+generators: #All generators players can obtain
+  #An example generator
+  diamond_gen:
+    name: "&6&lDiamond Generator"
+    lore: "&7&lGenerates Diamond" #Make this field empty if you want the item to have no lore
+    block: "diamond_ore"
+    drop: "diamond"
     upgrade_price: 500
-items: #For the /sell command
-  example_item:
+    tier: 1 #Tiers go up from 1, the higher the number the better the generator. The generator upgrades to the generator with the next tier
+items: #All items used. These are the items the generators drop
+  diamond:
     sell_price: 50
-    name: "&fExample" #Leave empty for default name
-    lore: "&f/sell to sell" #Leave empty for no lore
-sellwands:
-  x1Sellwand: #The name doesn't matter
+    name: "&bDiamond" #Leave empty for default name
+    lore: "&8/sell to sell" #Leave empty for no lore
+sellwands: #Sellwands, when the player right clicks with them on a chest, all items in it are sold
+  x1Sellwand:
     name: "x1 Sell wand"
     lore: "&cRight click a chest to sell its content"
     item: "minecraft:blaze_rod"
-    multiplier: 1
+    multiplier: 1 #By how much will the money you get will be multiplied, must be a whole number
 
 #Messages for example
 #Possible types: message,title,actionbar,none

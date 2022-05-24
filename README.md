@@ -20,7 +20,7 @@
   </p>
 </p>
 
-Make sure to read this carfuly before starting your project!
+Make sure to read this carefully before starting your project!
 <details open="open">
   <summary>Table of Contents</summary>
   <ol>
@@ -37,6 +37,7 @@ Make sure to read this carfuly before starting your project!
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
+    <li><a href="#permissions">Permissions</a></li>
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -83,51 +84,79 @@ Requires the following plugins:
 
 ## Usage
 
-To define a new generator, under the generator field in the config add the rank of the generator, and under it the information. For example:
-```yaml
-1:
-    name: "My First Generator!"
-    lore: "The lore for your generator"
-    block: "minecraft:cake"
-    drop: "minecraft:candle"
-    upgrade_price: 500
+To define a new generator, run in game the command 
 ```
-This will create a generator made of cake called "My First Generator!" with the lore "The lore for your generator" that generates candles (the same candle item from the next paragraph), and costs 500 to upgrade.
-
-To define a new sellable item, under the items field in the config add the id of the sellable item, and under it the information. For example:
-```yaml
-candle:
-    sell_price: 20
-    name: "&6&lCandle"
-    lore: "&7/sell to sell"
+/sg generator add <id> <name> <lore> <block> <drop> <upgrade_price> <tier>
 ```
-This will make the candle item sell for 20, be named &6&lCandle, with the lore &7/sell to sell
+Where \<id> is a unique name for the generator, \<name> is the name of the generator, \<lore> is its lore, \<block> is what block it is, \<drop> is what is drops, \<upgrade_price> is how much it costs to upgrade it, and \<tier> is how good it is (The higher the better)
 
-To define a sellwand, under the sellwands field in the config, add any name you want for the sellwand, and under it the information. For example:
- 
-```yaml
-x3SellWand:
-    name: "My First Sellwand!"
-    lore: "&cRight click a chest to sell its content!"
-    item: "minecraft:blaze_rod"
-    multiplier: 3
+If the name, or the lore have a space in them, it's important to put them in quotation marks.
+
+It's also possible to add a generator directly from the config.yml file. The default one has an example of how to define one.
+
+You can remove a generator by either deleting it in the config.yml file, or by using the command
 ```
-This will create a blaze rod sellwand, called "My First Sellwand!", with the lore "&Right click a chest to sell its content" and with a sell mutiplier of 3.
+/sg generator remove <id>
+```
+Where \<id> is the id of one of the existing generators.
 
-To change the frequency of the drops of the generators, change the drop_frequency field in the config. For example:
+You can edit a generator either from the config.yml file, or by using the command
+```
+/sg generator edit <id> <proprety> <value>
+```
+Which allows you to change a property of a generator. 
+
+The generators drop items, which must also be defined. You can add an item using the command
+```
+/sg item add <item> <name> <lore> <sell_price>
+```
+Where \<item> is the type of item, \<name> is its name, \<lore> is its lore, and \<sell_price> is for how much it sells for when using the /sell command
+
+Just like generators, you can edit and remove items by using
+```
+/sg item remove <item>
+/sg item edit <item> <proprety> <value>
+```
+
+It's also possible to define "wands" that can sell every sellable item in a chest. To define a sellwand, you can create one through the config.yml file, or run the command
+```
+/sg sellwand add <id> <name> <lore> <item> <multiplier>
+``` 
+Where the id is a unique name you give the sellwand, \<name> is its name, \<lore> is its lore, \<item> is what type of item the sellwand is, and \<mutliplier> is by how much the received from selling will by multiplied (mush be a whole number) 
+Similarly to items and generators, you can also edit and remove sellwand using
+```
+/sg item remove <id>
+/sg item edit <id> <proprety> <value>
+```
+
+To change the frequency of the drops of the generators, change the drop_frequency field in the config, for example:
 ```yaml
 drop_frequency: 100
 ```
 Will make generators drop every 100 ticks, meaning 5 seconds.
 
-If you want to require players to be on the server for their generators to work, set the field ```generate_offline``` to false. Be careful, turning it to true might cause alot of lag!
+If you want to require players to be on the server for their generators to work, set the field ```generate_offline``` to false. Be careful, setting it to true might cause a-lot of lag!
  
-You can also limit the maximum amount of generators a player can place down, by giving them or their rank the permission node: ```SimpleGenerators.max_gen.NUMBER```. For example the permission node ```SimpleGenerators.max_gen.5``` will allow them to place down 5 generators.
+You can also limit the maximum amount of generators a player can place down, by giving them or their rank the permission node: ```simplegenerators.max_gen.NUMBER```. For example the permission node ```simplegenerators.max_gen.5``` will allow them to place down 5 generators.
  
 To reload the config in-game, run:
 ```sh
-/SimpleGenerators reload
+/sg reload
 ```
+
+##Permissions
+
+Command | Permissions
+--- | ---
+Add generator | simplegenerators.admin.add.gen
+Remove generator | simplegenerators.admin.remove.gen
+Edit generator | simplegenerators.admin.edit.gen
+Add item | simplegenerators.admin.add.item
+Remove item | simplegenerators.admin.remove.item
+Edit item | simplegenerators.admin.edit.item
+Add sellwand | simplegenerators.admin.add.sellwand
+Remove sellwand | simplegenerators.admin.remove.sellwand
+Edit sellwand | simplegenerators.admin.edit.sellwand
 
 
 

@@ -32,13 +32,15 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
     private final File configFile = new File(getDataFolder(),"config.yml");
     private Connection conn;
     private Statement stmtExecutor;
-    private ConfigurationSection generators;
+    public static ConfigurationSection generators;
+    public static ConfigurationSection items;
+    public static ConfigurationSection sellWands;
     private static Economy eco;
     public static Logger logger;
     public static FileConfiguration config;
     private static boolean offlineGeneration;
     private static SimpleGenerators instance;
-    int max_gen;
+    String max_gen;
     HashMap<Player,Long> lastClickDelay = new HashMap<>();
     int id;
     @Override
@@ -54,9 +56,9 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        getCommand("sell").setExecutor(new CommandHandler(eco));
-        getCommand("SimpleGenerators").setExecutor(new CommandHandler(eco));
-        getCommand("SimpleGenerators").setTabCompleter(new CommandHandler(eco));
+        getCommand("sell").setExecutor(new CommandHandler(this,eco));
+        getCommand("SimpleGenerators").setExecutor(new CommandHandler(this,eco));
+        getCommand("SimpleGenerators").setTabCompleter(new CommandHandler(this,eco));
         try {
             Class.forName("org.sqlite.JDBC");
             conn = DriverManager.getConnection("jdbc:sqlite:info.db");
@@ -164,7 +166,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                 while (ans.next()) {
                     String location = ans.getString("location");
                     String placer = ans.getString("placer");
-                    int type = ans.getInt("type");
+                    String type = ans.getString("type");
                     if (location.equals(blockLocation)) {
                         if (placer.equals(player.getUniqueId().toString())) {
                             if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
@@ -193,19 +195,25 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                                 if (player.isSneaking()) {
                                     if (System.currentTimeMillis() - (lastClickDelay.containsKey(player) ? lastClickDelay.get(player) : 0) > 100) {
                                         lastClickDelay.put(player, System.currentTimeMillis());
-                                        if (eco.getBalance(player) >= getConfig().getInt("generators." + type + ".upgrade_price") || max_gen == type) {
-                                            if (max_gen == type) {
+                                        if (eco.getBalance(player) >= getConfig().getInt("generators." + type + ".upgrade_price") || max_gen.equals(type)) {
+                                            if (max_gen.equals(type)) {
                                                 executeMessage(getConfig().getConfigurationSection("messages.highest_gen"), player, new HashMap<>());
                                                 return;
                                             }
-                                            eco.withdrawPlayer(player, getConfig().getInt("generators." + type + ".upgrade_price"));
-                                            e.getClickedBlock().setType(Material.matchMaterial(getConfig().getString("generators." + (type + 1) + ".block")));
-                                            String genUpdate = "UPDATE gens SET type=? WHERE location=?";
-                                            PreparedStatement update = conn.prepareStatement(genUpdate);
-                                            update.setInt(1, type + 1);
-                                            update.setString(2, location);
-                                            update.execute();
-                                            executeMessage(getConfig().getConfigurationSection("messages.gen_upgrade"), player, new HashMap<>());
+                                            String nextGen = getNextGen(type);
+                                            e.setCancelled(true);
+                                            if (!nextGen.equals("")) {
+                                                eco.withdrawPlayer(player, getConfig().getInt("generators." + type + ".upgrade_price"));
+                                                e.getClickedBlock().setType(Material.matchMaterial(getConfig().getString("generators." + nextGen + ".block")));
+                                                String genUpdate = "UPDATE gens SET type=? WHERE location=?";
+                                                PreparedStatement update = conn.prepareStatement(genUpdate);
+                                                update.setString(1, nextGen);
+                                                update.setString(2, location);
+                                                update.execute();
+                                                executeMessage(getConfig().getConfigurationSection("messages.gen_upgrade"), player, new HashMap<>());
+                                            }else{
+                                                player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cerror in config.yaml, no next generator for non highest generator type, please notify a staff member. This is likely caused by the highest generator being set improperly, or a repeating tier"));
+                                            }
                                         } else {
                                             executeMessage(getConfig().getConfigurationSection("messages.not_enough_money"), player, new HashMap<>());
                                         }
@@ -237,7 +245,21 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                             String getPlacer = "SELECT player FROM chests WHERE location=\""+parseLocation(e.getClickedBlock().getLocation())+"\"";
                             ResultSet ans = stmtExecutor.executeQuery(getPlacer);
                             ans.next();
-                            String placer = ans.getString("player");
+                            String placer = "";
+                            try {
+                                placer = ans.getString("player");
+                            }catch (SQLException exception) {
+                                try {
+                                    String query = "INSERT INTO chests(location,player) values(?,?)";
+                                    PreparedStatement addChest = conn.prepareStatement(query);
+                                    addChest.setString(1, parseLocation(e.getClickedBlock().getLocation()));
+                                    addChest.setString(2, player.getUniqueId().toString());
+                                    addChest.execute();
+                                    placer = player.getUniqueId().toString();
+                                } catch (SQLException throwables) {
+                                    throwables.printStackTrace();
+                                }
+                            }
                             e.setCancelled(true);
                             if (placer.equals(player.getUniqueId().toString())) {
                                 Pair<Integer, Integer> answerData = sellInventory(((Container) e.getClickedBlock().getState()).getInventory(), eco, player, currentSellwand.getInt("multiplier"));
@@ -360,23 +382,69 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         }
         return maxGens;
     }
+    public String getNextGen(String gen){
+        Pair<String,Integer> next_gen = new Pair<>("",Integer.MAX_VALUE);
+        int genTier = getConfig().getInt("generators."+gen+".tier");
+        for (String configurationSection : getConfig().getConfigurationSection("generators").getKeys(false)){
+            int currentTier = generators.getInt(configurationSection+".tier");
+            if (next_gen.getB() > currentTier-genTier && currentTier > genTier){
+                next_gen.set(configurationSection,currentTier-genTier);
+                if (currentTier-genTier == 1){
+                    return configurationSection;
+                }
+            }
+        }
+        return next_gen.getA();
+    }
+    private String getHighestGen(){
+        Pair<String,Integer> highest_gen = new Pair<>("",0);
+        for (String configurationSection : getConfig().getConfigurationSection("generators").getKeys(false)){
+            if (highest_gen.getB() < generators.getInt(configurationSection+".tier")){
+                highest_gen.set(configurationSection,generators.getInt(configurationSection+".tier"));
+            }
+        }
+        return highest_gen.getA();
+    }
     private int getPlacedGens(Player player) throws SQLException {
         String countGensQuery = "SELECT count(*) FROM gens WHERE placer=\""+player.getUniqueId().toString()+"\"";
         ResultSet countGens = stmtExecutor.executeQuery(countGensQuery);
         countGens.next();
         return countGens.getInt(1);
     }
+    public static List<String> parseByQuotes(String[] strings){
+        StringBuilder currentArgument = new StringBuilder();
+        List<String> quotedArguments = new ArrayList<>();
+        boolean inQuotes = false;
+        for (String s : strings){
+            if (s.charAt(0) == '\"' && s.charAt(s.length()-1) == '\"'){
+                quotedArguments.add(s.substring(1,s.length()-1));
+            } else if (s.charAt(0) == '\"'){
+                currentArgument.append(s.substring(1)).append(" ");
+                inQuotes = true;
+            }else if (s.charAt(s.length()-1) == '\"'){
+                quotedArguments.add(currentArgument.append(s, 0, s.length()-1).toString());
+                currentArgument.setLength(0);
+                inQuotes = false;
+            }else{
+                if (inQuotes) {
+                    currentArgument.append(s).append(" ");
+                }else{
+                    quotedArguments.add(s);
+                }
+            }
+        }
+        return quotedArguments;
+    }
     public void onEnableRun(){
         generators = getConfig().getConfigurationSection("generators");
+        items = getConfig().getConfigurationSection("items");
+        sellWands = getConfig().getConfigurationSection("sellwands");
         getLogger().info("Simple generators is setup!");
         if (!configFile.exists()){
             saveDefaultConfig();
         }
         this.reloadConfig();
-        max_gen = 0;
-        for (String configurationSection : getConfig().getConfigurationSection("generators").getKeys(false)){
-            max_gen = Math.max(max_gen,Integer.parseInt(configurationSection));
-        }
+        max_gen = getHighestGen();
         offlineGeneration = getConfig().getBoolean("generate_offline");
         logger = getLogger();
         config = getConfig();
@@ -387,19 +455,32 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
             try {
                 String query = "SELECT location,type,placer FROM gens";
                 ResultSet gens = stmtExecutor.executeQuery(query);
+                Set<String> genTypes = generators.getKeys(false);
                 while (gens.next()){
                     OfflinePlayer playerGen = getServer().getOfflinePlayer(UUID.fromString(gens.getString("placer")));
-                    if (offlineGeneration || playerGen.isOnline()) {
-                        ConfigurationSection itemInfo = getConfig().getConfigurationSection("generators." + gens.getString("type"));
-                        ConfigurationSection dropInfo = getConfig().getConfigurationSection("items."+itemInfo.getString("drop").substring(10));
-                        Location dropLoc = unparseLocation(gens.getString("location"));
-                        dropLoc.add(0, 1, 0);
-                        ItemStack drop = new ItemStack(Material.matchMaterial(itemInfo.getString("drop")));
-                        ItemMeta meta = drop.getItemMeta();
-                        if (!dropInfo.getString("name").isEmpty()) meta.setDisplayName(ChatColor.translateAlternateColorCodes('&',dropInfo.getString("name")));
-                        if (!dropInfo.getString("lore").isEmpty()) meta.setLore(Collections.singletonList(ChatColor.translateAlternateColorCodes('&', dropInfo.getString("lore"))));
-                        drop.setItemMeta(meta);
-                        dropLoc.getWorld().dropItemNaturally(dropLoc, drop);
+                    if (genTypes.contains(gens.getString("type"))) {
+                        if ((offlineGeneration || playerGen.isOnline())) {
+                            ConfigurationSection itemInfo = getConfig().getConfigurationSection("generators." + gens.getString("type"));
+                            ConfigurationSection dropInfo = getConfig().getConfigurationSection("items." + (itemInfo.getString("drop").startsWith("minecraft:") ? itemInfo.getString("drop").substring(10) : itemInfo.getString("drop")));
+                            if (dropInfo == null){
+                                logger.warning("It seems like item "+itemInfo.getString("drop")+" doesn't exist");
+                                continue;
+                            }
+                            Location dropLoc = unparseLocation(gens.getString("location"));
+                            dropLoc.add(0, 1, 0);
+                            ItemStack drop = new ItemStack(Material.matchMaterial(itemInfo.getString("drop")));
+                            ItemMeta meta = drop.getItemMeta();
+                            if (!dropInfo.getString("name").isEmpty())
+                                meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', dropInfo.getString("name")));
+                            if (!dropInfo.getString("lore").isEmpty())
+                                meta.setLore(Collections.singletonList(ChatColor.translateAlternateColorCodes('&', dropInfo.getString("lore"))));
+                            drop.setItemMeta(meta);
+                            dropLoc.getWorld().dropItemNaturally(dropLoc, drop);
+                        }
+                    }else{
+                        String deletionQuery = "DELETE FROM gens WHERE location='" + gens.getString("location") + "'";
+                        PreparedStatement delete = conn.prepareStatement(deletionQuery);
+                        delete.execute();
                     }
                 }
             } catch (SQLException throwables) {

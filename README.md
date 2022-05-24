@@ -110,7 +110,7 @@ You can get one of the generators by using
 ```
 /sg generator get <id>
 ``` 
-Which gives you the generator with the id of <id>
+Which gives you the generator with the id of /<id>
 
 The generators drop items, which must also be defined. You can add an item using the command
 ```

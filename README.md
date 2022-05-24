@@ -118,7 +118,7 @@ The generators drop items, which must also be defined. You can add an item using
 ```
 Where \<item> is the type of item, \<name> is its name, \<lore> is its lore, and \<sell_price> is for how much it sells for when using the /sell command
 
-Just like generators, you can edit and remove items by using
+Just like generators, you can edit and remove items by using 
 ```
 /sg item remove <item>
 /sg item edit <item> <proprety> <value>

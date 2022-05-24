@@ -125,8 +125,8 @@ It's also possible to define "wands" that can sell every sellable item in a ches
 Where the id is a unique name you give the sellwand, \<name> is its name, \<lore> is its lore, \<item> is what type of item the sellwand is, and \<mutliplier> is by how much the received from selling will by multiplied (mush be a whole number) 
 Similarly to items and generators, you can also edit and remove sellwand using
 ```
-/sg item remove <id>
-/sg item edit <id> <proprety> <value>
+/sg sellwand remove <id>
+/sg sellwand edit <id> <proprety> <value>
 ```
 
 To change the frequency of the drops of the generators, change the drop_frequency field in the config, for example:

@@ -2,6 +2,7 @@ package plainplaying.plugin.gens;
 import com.mojang.serialization.Decoder;
 import net.milkbowl.vault.economy.Economy;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -10,7 +11,10 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
+import javax.inject.Singleton;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -63,7 +67,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
                                     }
                                     SimpleGenerators.config.set("generators." + quotedArguments.get(2) + ".tier", Integer.parseInt(quotedArguments.get(8)));
                                     plugin.saveConfig();
-                                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bAdded new generator &c" + quotedArguments.get(2) + "&b, name &c" + quotedArguments.get(3) + "&b, blore &c" + quotedArguments.get(4) + "&b, block &c" + quotedArguments.get(5) + "&b, drop &c" + quotedArguments.get(6) + "&b, upgrade price &c" + quotedArguments.get(7) + "&b, tier &c" + quotedArguments.get(8)));
+                                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bAdded new generator &c" + quotedArguments.get(2) + "&b, name &c" + quotedArguments.get(3) + "&b, lore &c" + quotedArguments.get(4) + "&b, block &c" + quotedArguments.get(5) + "&b, drop &c" + quotedArguments.get(6) + "&b, upgrade price &c" + quotedArguments.get(7) + "&b, tier &c" + quotedArguments.get(8)));
                                     SimpleGenerators.getInstance().onEnableRun();
                                 }
                             }
@@ -125,6 +129,26 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
                                         plugin.saveConfig();
                                         SimpleGenerators.getInstance().onEnableRun();
                                         player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bChanged property &c" + quotedArguments.get(2) + " &bof &bid &c" + quotedArguments.get(3) + "&b to &c" + quotedArguments.get(4)));
+                                    }
+                                }
+                            }
+                        }
+                        case "get" -> {
+                            if (player.hasPermission("simgplegenerators.admin.gen.get")) {
+                                if (strings.length != 3) {
+                                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bIncorrect syntax, &3check documentation for more info"));
+                                } else {
+                                    if (!SimpleGenerators.config.contains("generators." + strings[2])) {
+                                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bRUnknown generator &c " + strings[2] + " &b. Please enter a valid id"));
+                                    } else {
+                                        ConfigurationSection currentGen = SimpleGenerators.generators.getConfigurationSection(strings[2]);
+                                        ItemStack generator = new ItemStack(Material.matchMaterial(currentGen.getString("block")));
+                                        ItemMeta generatorMeta = generator.getItemMeta();
+                                        generatorMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&',currentGen.getString("name")));
+                                        generatorMeta.setLore(Collections.singletonList(ChatColor.translateAlternateColorCodes('&',currentGen.getString("lore"))));
+                                        generator.setItemMeta(generatorMeta);
+                                        plugin.giveItemsNaturally(player,generator,player.getLocation());
+                                        player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&bGave you generator &c"+strings[2]));
                                     }
                                 }
                             }
@@ -278,7 +302,10 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
                     }
                 }
             }else if (strings.length == 2){
-                List<String> possibleCompletions = Arrays.asList("add","remove","edit");
+                List<String> possibleCompletions = new ArrayList<>(Arrays.asList("add","remove","edit"));
+                if (strings[0].equals("generator")){
+                    possibleCompletions.add("get");
+                }
                 String input = strings[1].toLowerCase();
                 if (strings[0].equals("generator") || strings[0].equals("item") || strings[0].equals("sellwand")){
                     for (String completion : possibleCompletions) {
@@ -291,7 +318,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
                     }
                 }
             }else if (strings.length == 3){
-                if ((strings[0].equals("generator") && (strings[1].equals("remove") || strings[1].equals("edit")))){
+                if ((strings[0].equals("generator") && (strings[1].equals("remove") || strings[1].equals("edit") || strings[1].equals("get")))){
                     String input = strings[2].toLowerCase();
                     for (String completion : SimpleGenerators.config.getConfigurationSection("generators").getKeys(false)){
                         if (completion.startsWith(input)) {

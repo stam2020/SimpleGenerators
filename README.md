@@ -106,6 +106,12 @@ You can edit a generator either from the config.yml file, or by using the comman
 ```
 Which allows you to change a property of a generator. 
 
+You can get one of the generators by using
+```
+/sg generator get <id>
+``` 
+Which gives you the generator with the id of <id>
+
 The generators drop items, which must also be defined. You can add an item using the command
 ```
 /sg item add <item> <name> <lore> <sell_price>
@@ -144,9 +150,9 @@ To reload the config in-game, run:
 /sg reload
 ```
 
-##Permissions
+## Permissions
 
-Command | Permissions
+Command | Permission
 --- | ---
 Add generator | simplegenerators.admin.add.gen
 Remove generator | simplegenerators.admin.remove.gen
@@ -157,6 +163,7 @@ Edit item | simplegenerators.admin.edit.item
 Add sellwand | simplegenerators.admin.add.sellwand
 Remove sellwand | simplegenerators.admin.remove.sellwand
 Edit sellwand | simplegenerators.admin.edit.sellwand
+Reload config | simplegenerators.admin.reload
 
 
 

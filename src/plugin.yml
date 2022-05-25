@@ -14,25 +14,27 @@ depend:
 permissions:
   simplegenerators.admin.reload:
     description: Allows a player to reload the plugin
-  simplegenerators.gen.add:
+  simplegenerators.admin.gen.add:
     description: Allows a player to add a generator
-  simplegenerators.gen.remove:
+  simplegenerators.admin.gen.remove:
     description: Allows a player to remove a generator
-  simplegenerators.gen.edit:
+  simplegenerators.admin.gen.edit:
     description: Allows a player to edit a generator
-  simplegenerators.gen.get:
+  simplegenerators.admin.gen.get:
     description: Allows a player to give themselves a generator
-  simplegenerators.item.add:
+  simplegenerators.admin.item.add:
     description: Allows a player to add an item
-  simplegenerators.item.remove:
+  simplegenerators.admin.item.remove:
     description: Allows a player to remove an item
-  simplegenerators.item.edit:
+  simplegenerators.admin.item.edit:
     description: Allows a player to edit an item
-  simplegenerators.sellwand.add:
+  simplegenerators.admin.sellwand.add:
     description: Allows a player to add a sellwand
-  simplegenerators.sellwand.remove:
+  simplegenerators.admin.sellwand.remove:
     description: Allows a player to remove a sellwand
-  simplegenerators.sellwand.edit:
+  simplegenerators.admin.sellwand.edit:
     description: Allows a player to edit a sellwand
+  simplegenerators.admin.sellwand.get:
+    description: Allows a player to give themselves a sellwand
 
 

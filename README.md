@@ -61,6 +61,8 @@ Why you should use this plugin:
 
 I hope that you will find this plugin useful!
 
+A great [tutorial video](https://www.youtube.com/watch?v=IJ6dVJdGnig) made by erha8, demonstrating how to use the commands and the config file to make a server
+
 ### Built With
 
 This plugin is built using

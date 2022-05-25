@@ -264,6 +264,26 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
                                 }
                             }
                         }
+                        case "get" -> {
+                            if (player.hasPermission("simgplegenerators.admin.sellwand.get")) {
+                                if (strings.length != 3) {
+                                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bIncorrect syntax, &3check documentation for more info"));
+                                } else {
+                                    if (!SimpleGenerators.config.contains("sellwands." + strings[2])) {
+                                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bRUnknown sellwand &c " + strings[2] + " &b. Please enter a valid id"));
+                                    } else {
+                                        ConfigurationSection currentSellwand = SimpleGenerators.config.getConfigurationSection("sellwands."+strings[2]);
+                                        ItemStack generator = new ItemStack(Material.matchMaterial(currentSellwand.getString("item")));
+                                        ItemMeta generatorMeta = generator.getItemMeta();
+                                        generatorMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&',currentSellwand.getString("name")));
+                                        generatorMeta.setLore(Collections.singletonList(ChatColor.translateAlternateColorCodes('&',currentSellwand.getString("lore"))));
+                                        generator.setItemMeta(generatorMeta);
+                                        plugin.giveItemsNaturally(player,generator,player.getLocation());
+                                        player.sendMessage(ChatColor.translateAlternateColorCodes('&',"&bGave you sellwand &c"+strings[2]));
+                                    }
+                                }
+                            }
+                        }
                         default -> {
                             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bUnknown argument for /sg sellwand, &3valid types are: add,remove,edit"));
                         }
@@ -303,7 +323,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
                 }
             }else if (strings.length == 2){
                 List<String> possibleCompletions = new ArrayList<>(Arrays.asList("add","remove","edit"));
-                if (strings[0].equals("generator")){
+                if (strings[0].equals("generator") || strings[0].equals("sellwand")){
                     possibleCompletions.add("get");
                 }
                 String input = strings[1].toLowerCase();
@@ -338,7 +358,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
                             completions.add(completion);
                         }
                     }
-                }else if (strings[0].equals("sellwand") && (strings[1].equals("remove") || strings[1].equals("edit"))){
+                }else if (strings[0].equals("sellwand") && (strings[1].equals("remove") || strings[1].equals("edit") || strings[1].equals("get"))){
                     String input = strings[2].toLowerCase();
                     for (String completion : SimpleGenerators.config.getConfigurationSection("sellwands").getKeys(false)){
                         if (completion.startsWith(input)) {

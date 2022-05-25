@@ -134,6 +134,10 @@ Similarly to items and generators, you can also edit and remove sellwand using
 /sg sellwand remove <id>
 /sg sellwand edit <id> <proprety> <value>
 ```
+It's possible to give yourself a sellwand by using
+```
+/sg sellwand get <id>
+``` 
 
 To change the frequency of the drops of the generators, change the drop_frequency field in the config, for example:
 ```yaml
@@ -157,12 +161,14 @@ Command | Permission
 Add generator | simplegenerators.admin.add.gen
 Remove generator | simplegenerators.admin.remove.gen
 Edit generator | simplegenerators.admin.edit.gen
+Get generator | simplegenerators.admin.get.generator
 Add item | simplegenerators.admin.add.item
 Remove item | simplegenerators.admin.remove.item
 Edit item | simplegenerators.admin.edit.item
 Add sellwand | simplegenerators.admin.add.sellwand
 Remove sellwand | simplegenerators.admin.remove.sellwand
 Edit sellwand | simplegenerators.admin.edit.sellwand
+Get sellwand | simplegenerators.admin.get.sellwand
 Reload config | simplegenerators.admin.reload
 
 

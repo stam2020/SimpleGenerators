@@ -458,7 +458,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                 Set<String> genTypes = generators.getKeys(false);
                 while (gens.next()){
                     OfflinePlayer playerGen = getServer().getOfflinePlayer(UUID.fromString(gens.getString("placer")));
-                    if (genTypes.contains(gens.getString("type"))) {
+                    if (genTypes.contains(gens.getString("type")) && unparseLocation(gens.getString("location")).getBlock().getType() != Material.AIR) {
                         if ((offlineGeneration || playerGen.isOnline())) {
                             ConfigurationSection itemInfo = getConfig().getConfigurationSection("generators." + gens.getString("type"));
                             ConfigurationSection dropInfo = getConfig().getConfigurationSection("items." + (itemInfo.getString("drop").startsWith("minecraft:") ? itemInfo.getString("drop").substring(10) : itemInfo.getString("drop")));

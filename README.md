@@ -83,6 +83,9 @@ Requires the following plugins:
 * [Vault](https://dev.bukkit.org/projects/vault)
 * Any economy plugin, such as [Essentials](https://www.spigotmc.org/resources/essentialsx.9089/)
 
+If you want support for placeholders:
+* [PlaceholderAPI](https://www.spigotmc.org/resources/placeholderapi.6245/)
+
 
 ## Usage
 
@@ -173,8 +176,13 @@ Edit sellwand | simplegenerators.admin.edit.sellwand
 Get sellwand | simplegenerators.admin.get.sellwand
 Reload config | simplegenerators.admin.reload
 
+## Placeholders
+Requires PlaceholderAPI
 
-
+Placeholder | Value
+--- | ---
+%sg_max_gens% | The maximum gens a player has
+%sg_gen_amount% | The current amount of placed gens
 ## Roadmap
 
 See the [open issues](https://github.com/stam2020/SimpleGenerators/issues) for a list of proposed features (and known issues).

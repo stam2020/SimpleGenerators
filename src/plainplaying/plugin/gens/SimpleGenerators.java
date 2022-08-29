@@ -1,6 +1,10 @@
 package plainplaying.plugin.gens;
 
 
+import me.clip.placeholderapi.PlaceholderAPI;
+import me.clip.placeholderapi.PlaceholderAPIPlugin;
+import me.clip.placeholderapi.PlaceholderHook;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.milkbowl.vault.economy.Economy;
@@ -40,6 +44,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
     public static FileConfiguration config;
     private static boolean offlineGeneration;
     private static SimpleGenerators instance;
+    private static PlaceholderHandler placeholderHandler;
     String max_gen;
     HashMap<Player,Long> lastClickDelay = new HashMap<>();
     int id;
@@ -55,6 +60,14 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
             getLogger().severe("Disabled due to no Vault dependency found!");
             getServer().getPluginManager().disablePlugin(this);
             return;
+        }
+        if (!Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+            getLogger().severe("Disabled due to no PlaceholderAPI dependency found!");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }else {
+            placeholderHandler = new PlaceholderHandler(this);
+            placeholderHandler.register();
         }
         getCommand("sell").setExecutor(new CommandHandler(this,eco));
         getCommand("SimpleGenerators").setExecutor(new CommandHandler(this,eco));
@@ -262,7 +275,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                             }
                             e.setCancelled(true);
                             if (placer.equals(player.getUniqueId().toString())) {
-                                Pair<Integer, Integer> answerData = sellInventory(((Container) e.getClickedBlock().getState()).getInventory(), eco, player, currentSellwand.getInt("multiplier"));
+                                Pair<Double, Integer> answerData = sellInventory(((Container) e.getClickedBlock().getState()).getInventory(), eco, player, currentSellwand.getDouble("multiplier"));
                                 HashMap<String,String> env = new HashMap<>();
                                 env.put("a",answerData.getA().toString());
                                 env.put("n",answerData.getB().toString());
@@ -333,9 +346,9 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         }
         player.getWorld().dropItemNaturally(dropLocation, items);
     }
-    public static Pair<Integer,Integer> sellInventory(Inventory inv, Economy eco, Player player, int multiplier){
+    public static Pair<Double,Integer> sellInventory(Inventory inv, Economy eco, Player player, double multiplier){
         int itemsSold = 0;
-        int sellPrice = 0;
+        double sellPrice = 0;
         Set<String> sellableItems = SimpleGenerators.config.getConfigurationSection("items").getKeys(false);
         for (ItemStack item : inv){
             if (item != null) {
@@ -371,13 +384,11 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         }
         return message;
     }
-    private int getMaxGens(Player player){
+    protected int getMaxGens(Player player){
         int maxGens = 0;
-        Iterator<PermissionAttachmentInfo> perms = player.getEffectivePermissions().iterator();
-        while (perms.hasNext()){
-            PermissionAttachmentInfo perm = perms.next();
-            if (perm.getPermission().startsWith("simplegenerators.max_gens.")){
-                maxGens = Math.max(maxGens,Integer.parseInt(perm.getPermission().substring(26)));
+        for (PermissionAttachmentInfo perm : player.getEffectivePermissions()) {
+            if (perm.getPermission().startsWith("simplegenerators.max_gens.")) {
+                maxGens = Math.max(maxGens, Integer.parseInt(perm.getPermission().substring(26)));
             }
         }
         return maxGens;
@@ -396,6 +407,14 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         }
         return next_gen.getA();
     }
+    public static String removeCharacter(String s, char c){
+        for (int i = 0;i < s.length();i++){
+            if (s.charAt(i) == c){
+                s = s.substring(0,i) + s.substring(i+1);
+            }
+        }
+        return s;
+    }
     private String getHighestGen(){
         Pair<String,Integer> highest_gen = new Pair<>("",0);
         for (String configurationSection : getConfig().getConfigurationSection("generators").getKeys(false)){
@@ -405,7 +424,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
         }
         return highest_gen.getA();
     }
-    private int getPlacedGens(Player player) throws SQLException {
+    protected int getPlacedGens(OfflinePlayer player) throws SQLException {
         String countGensQuery = "SELECT count(*) FROM gens WHERE placer=\""+player.getUniqueId().toString()+"\"";
         ResultSet countGens = stmtExecutor.executeQuery(countGensQuery);
         countGens.next();
@@ -458,7 +477,7 @@ public class SimpleGenerators extends JavaPlugin implements Listener {
                 Set<String> genTypes = generators.getKeys(false);
                 while (gens.next()){
                     OfflinePlayer playerGen = getServer().getOfflinePlayer(UUID.fromString(gens.getString("placer")));
-                    if (genTypes.contains(gens.getString("type")) && unparseLocation(gens.getString("location")).getBlock().getType() != Material.AIR) {
+                    if (genTypes.contains(gens.getString("type")) && !unparseLocation(gens.getString("location")).getBlock().getType().isAir()) {
                         if ((offlineGeneration || playerGen.isOnline())) {
                             ConfigurationSection itemInfo = getConfig().getConfigurationSection("generators." + gens.getString("type"));
                             ConfigurationSection dropInfo = getConfig().getConfigurationSection("items." + (itemInfo.getString("drop").startsWith("minecraft:") ? itemInfo.getString("drop").substring(10) : itemInfo.getString("drop")));

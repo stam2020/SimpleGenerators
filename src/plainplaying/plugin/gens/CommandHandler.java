@@ -30,7 +30,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
         Player player = (Player) commandSender;
         if (command.getName().equalsIgnoreCase("sell")){
             Inventory playerInv = player.getInventory();
-            Pair<Integer,Integer> answerData = SimpleGenerators.sellInventory(playerInv,eco,player,1);
+            Pair<Double,Integer> answerData = SimpleGenerators.sellInventory(playerInv,eco,player,1);
             HashMap<String,String> env = new HashMap<>();
             env.put("a",answerData.getA().toString());
             env.put("n",answerData.getB().toString());
@@ -225,7 +225,7 @@ public class CommandHandler implements CommandExecutor, TabExecutor {
                                     SimpleGenerators.config.set("sellwands." + quotedArguments.get(2) + ".name", quotedArguments.get(3));
                                     SimpleGenerators.config.set("sellwands." + quotedArguments.get(2) + ".lore", quotedArguments.get(4));
                                     SimpleGenerators.config.set("sellwands." + quotedArguments.get(2) + ".item", quotedArguments.get(5));
-                                    SimpleGenerators.config.set("sellwands." + quotedArguments.get(2) + ".multiplier", Integer.parseInt(quotedArguments.get(6)));
+                                    SimpleGenerators.config.set("sellwands." + quotedArguments.get(2) + ".multiplier", Double.parseDouble(quotedArguments.get(6)));
                                     plugin.saveConfig();
                                     player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&bAdded new sellwand &c" + quotedArguments.get(2) + "&b, name &c" + quotedArguments.get(3) + "&b, lore &c" + quotedArguments.get(4) + "&b, item &c" + quotedArguments.get(5) + "&b, multiplier &c" + quotedArguments.get(6)));
                                     SimpleGenerators.getInstance().onEnableRun();

@@ -11,6 +11,7 @@ commands:
     aliases: [sg,simplegens,simplegenerators,sgens]
 depend:
   - Vault
+  - PlaceholderAPI
 permissions:
   simplegenerators.admin.reload:
     description: Allows a player to reload the plugin
